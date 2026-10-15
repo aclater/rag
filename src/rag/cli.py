@@ -79,6 +79,15 @@ def _cmd_eval(settings: Settings, args: argparse.Namespace) -> int:
 
     s = Searcher(settings)
     try:
+        if args.answers:
+            from rag.answers import run_answers
+
+            for golden in args.golden:
+                report = run_answers(s, Path(golden), args.answers, label=args.label)
+                report["mode"], report["rerank"] = "answers", True
+                path = write_report(report, Path(args.out))
+                print(json.dumps({"report": str(path), **report["summary"]}, indent=2))
+            return 0
         for golden in args.golden:
             report = run(
                 s, Path(golden), mode=args.mode, rerank=not args.no_rerank, label=args.label
@@ -115,6 +124,11 @@ def main(argv: list[str] | None = None) -> int:
     pe.add_argument("--mode", choices=["hybrid", "vector", "keyword"], default="hybrid")
     pe.add_argument("--no-rerank", action="store_true")
     pe.add_argument("--label", default="")
+    pe.add_argument(
+        "--answers",
+        metavar="CHAT_MODEL",
+        help="answer-level eval: one chat turn per case with this model, e.g. chat/gpt-oss-20b",
+    )
     pe.add_argument("--out", default="eval/reports")
     args = p.parse_args(argv)
     settings = Settings.from_env()

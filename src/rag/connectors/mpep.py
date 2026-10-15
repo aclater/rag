@@ -17,7 +17,7 @@ import logging
 import os
 import re
 from collections.abc import Sequence
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
@@ -126,11 +126,16 @@ def load(
             parsed[p.name] = json.loads(cached.read_text())
         else:
             todo.append(p)
-    n = workers or int(os.environ.get("RAG_INGEST_WORKERS", "4"))
+    n = workers or int(os.environ.get("RAG_INGEST_WORKERS", "3"))
     if todo:
         log.info("parsing %d chapter(s) with %d worker(s)", len(todo), n)
         with ProcessPoolExecutor(max_workers=n) as pool:
-            for p, secs in zip(todo, pool.map(_parse_chapter, [str(t) for t in todo]), strict=True):
+            futures = {pool.submit(_parse_chapter, str(p)): p for p in todo}
+            # Cache each chapter as soon as it's parsed, so an interrupted run
+            # (e.g. a worker killed for memory) loses nothing already done.
+            for fut in as_completed(futures):
+                p = futures[fut]
+                secs = fut.result()
                 parsed[p.name] = secs
                 log.info("%s: %d sections", p.name, len(secs))
                 if parse_cache:

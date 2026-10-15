@@ -56,13 +56,17 @@ Radeon 780M/890M or Strix Halo were the development targets), ~25 GB free disk.
 ```bash
 git clone https://github.com/aclater/rag && cd rag
 models/fetch.sh laptop-light       # download the profile's models, verify sha256
-deploy/install.sh laptop-light     # render quadlets, create secrets, start the pod
+deploy/install.sh laptop-light     # build the MCP image, render quadlets, start the pod
+deploy/ingest-mpep.sh              # fetch the public USPTO MPEP and index it
 ```
 
-The UI is then on http://127.0.0.1:3000 (first sign-up becomes the admin).
-Profiles, containers, security choices and troubleshooting:
-[docs/deploy.md](docs/deploy.md). Ingestion and the retrieval tools land in
-#9 and #10.
+The UI is then on http://127.0.0.1:3000 (the first sign-up becomes the admin),
+with the `rag` tools (search, fetch, list_collections) available to the model.
+Retrieval quality is measured with `deploy/eval.sh` against `eval/mpep.yaml`.
+
+Details: [docs/deploy.md](docs/deploy.md) (containers, profiles, security) and
+[docs/ingest-and-search.md](docs/ingest-and-search.md) (connectors, retrieval,
+evaluation).
 
 See [docs/architecture.md](docs/architecture.md) for profiles, ports and
 operations.

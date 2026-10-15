@@ -13,6 +13,7 @@ Cases with no expected sources (abstain) are excluded.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import time
 from collections.abc import Sequence
@@ -85,6 +86,8 @@ def aggregate(results: Sequence[CaseResult]) -> dict[str, Any]:
 
 
 def _git_revision() -> str:
+    if os.environ.get("RAG_GIT_REVISION"):
+        return os.environ["RAG_GIT_REVISION"]
     try:
         return subprocess.run(  # noqa: S603
             ["git", "rev-parse", "--short", "HEAD"],  # noqa: S607
@@ -129,6 +132,7 @@ def run(
         "embedding_model": searcher.settings.embed_model,
         "rerank_model": searcher.settings.rerank_model if rerank else None,
         "git_revision": _git_revision(),
+        "profile": os.environ.get("RAG_PROFILE", ""),
         "summary": aggregate(results),
         "cases": [
             {

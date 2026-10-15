@@ -25,7 +25,8 @@ Vulkan-capable GPU, ~25 GB free disk for the `laptop` profile (less for
 | `rag-embed` | same | 8081 | 4 CPU, 2 GB |
 | `rag-rerank` | same | 8082 | 4 CPU, 2 GB |
 | `rag-stack` | Llama Stack, Red Hat Open Data Hub build (RHOAI 3.4) | 8321 | 2 CPU, 4 GB |
-| `rag-webui` | Open WebUI | 3000, **published on host 127.0.0.1:3000** | 2 CPU, 3 GB |
+| `rag-mcp` | This project's retrieval tools, built locally on UBI 10 | 8090 (`/mcp`) | 1 CPU, 512 MB |
+| `rag-webui` | Open WebUI, with the `rag` MCP tools configured | 3000, **published on host 127.0.0.1:3000** | 2 CPU, 3 GB |
 
 Containers in a pod share one network namespace, so services reach each other
 on `127.0.0.1`. Only the pod's single `PublishPort` (the UI, on the host's
@@ -40,10 +41,13 @@ the driver and isn't counted against the container memory limits.
 - All capabilities dropped, `NoNewPrivileges=true`.
 - Secrets (`rag-db-password`, `rag-db-admin-password`, `rag-webui-secret`) are
   generated once by `install.sh` into podman's secret store; nothing secret is
-  written to the repository or the rendered quadlets.
-- Open WebUI runs with authentication on, offline mode, and telemetry and
-  analytics off. Its own document features use the pod's embedding server, so
-  it downloads no models.
+  written to the repository or the rendered quadlets. Open WebUI's secret is a
+  Fernet key (URL-safe base64 of 32 bytes), as it requires.
+- Open WebUI runs with authentication on, offline mode, CORS limited to its
+  own origin, and telemetry and analytics off. Its own document features use
+  the pod's embedding server, so it downloads no models. The `rag` MCP tool
+  server is configured on first boot; afterwards it's managed in Admin
+  settings > External tools (grant other users access there).
 
 ## Why not RamaLama's generated quadlets as-is
 
@@ -66,6 +70,8 @@ service at startup.
 
 - **A unit keeps restarting:** `journalctl --user -u rag-<name> -n 50`.
   `install.sh` resets systemd's restart limit on every run.
+- **`rag-mcp` image out of date:** `install.sh` tags it by git revision and
+  rebuilds it when the working tree has uncommitted changes.
 - **GPU not used:** `podman run --rm --device /dev/dri <RAMALAMA_IMAGE> llama-server --list-devices`
   should list a `Vulkan0` device.
 - **Llama Stack can't reach PostgreSQL:** `rag-db` reports ready only when its
