@@ -1,0 +1,113 @@
+# Llama Stack run configuration for rag.
+# Based on the Red Hat Open Data Hub distribution's config (llama_stack
+# 0.7.1+rhaiv.1), reduced to what this project uses. All services are reached
+# over the pod's shared loopback; nothing here is exposed outside the pod.
+version: 2
+image_name: rag
+apis:
+- inference
+- vector_io
+- tool_runtime
+- files
+- responses
+- conversations
+
+providers:
+  inference:
+  # Profile-selected models served by llama.cpp (RamaLama image).
+  - provider_id: chat
+    provider_type: remote::llama-cpp-server
+    config:
+      base_url: http://127.0.0.1:8080/v1
+  - provider_id: embed
+    provider_type: remote::llama-cpp-server
+    config:
+      base_url: http://127.0.0.1:8081/v1
+  vector_io:
+  - provider_id: pgvector
+    provider_type: remote::pgvector
+    config:
+      host: 127.0.0.1
+      port: 5432
+      db: rag
+      user: rag
+      password: ${env.POSTGRES_PASSWORD}
+      distance_metric: COSINE
+      persistence:
+        backend: kv_default
+        namespace: vector_io::pgvector
+  tool_runtime:
+  - provider_id: model-context-protocol
+    provider_type: remote::model-context-protocol
+    config: {}
+  files:
+  - provider_id: localfs
+    provider_type: inline::localfs
+    config:
+      storage_dir: /tmp/rag-files
+      metadata_store:
+        table_name: files_metadata
+        backend: sql_default
+  responses:
+  - provider_id: builtin
+    provider_type: inline::builtin
+    config:
+      persistence:
+        agent_state:
+          namespace: agents
+          backend: kv_default
+        responses:
+          table_name: responses
+          backend: sql_default
+
+storage:
+  backends:
+    kv_default:
+      type: kv_postgres
+      host: 127.0.0.1
+      port: 5432
+      db: rag
+      user: rag
+      password: ${env.POSTGRES_PASSWORD}
+      table_name: llamastack_kvstore
+    sql_default:
+      type: sql_postgres
+      host: 127.0.0.1
+      port: 5432
+      db: rag
+      user: rag
+      password: ${env.POSTGRES_PASSWORD}
+  stores:
+    metadata:
+      backend: kv_default
+      namespace: registry
+    inference:
+      table_name: inference_store
+      backend: sql_default
+    conversations:
+      table_name: openai_conversations
+      backend: sql_default
+    prompts:
+      namespace: prompts
+      backend: kv_default
+
+registered_resources:
+  models:
+  - model_id: ${env.CHAT_MODEL_ID}
+    provider_id: chat
+    provider_model_id: ${env.CHAT_MODEL_ID}
+    model_type: llm
+  - model_id: ${env.EMBED_MODEL_ID}
+    provider_id: embed
+    provider_model_id: ${env.EMBED_MODEL_ID}
+    model_type: embedding
+    metadata:
+      embedding_dimension: ${env.EMBED_DIM}
+  shields: []
+  vector_dbs: []
+
+telemetry:
+  enabled: false
+
+server:
+  port: 8321

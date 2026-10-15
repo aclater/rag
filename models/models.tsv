@@ -1,0 +1,9 @@
+# Models used by the profiles. One row per GGUF file.
+# Columns: file, url, sha256 (from the Hugging Face LFS pointer), role, profiles,
+#          upstream model, upstream architecture (config.json model_type), origin check
+# Origin check: the upstream card's base_model and config.json architecture were
+# inspected on 2026-10-15; no Chinese-origin weights (see CLAUDE.md).
+granite-embedding-english-r2.f16.gguf	https://huggingface.co/mradermacher/granite-embedding-english-r2-GGUF/resolve/main/granite-embedding-english-r2.f16.gguf	c3a05845bce55e3fce9a5e678e9a7e3852c3f5bd3958d2039736e2407843369c	embed	all	ibm-granite/granite-embedding-english-r2	modernbert	IBM; no base_model; ModernBertModel
+granite-embedding-reranker-english-r2-f16.gguf	https://huggingface.co/trithemius/granite-embedding-reranker-english-r2-GGUF/resolve/main/granite-embedding-reranker-english-r2-f16.gguf	0f198ba5462d024b511b227bdc8100b59d79c1a262074f9332cc5e6ef6b6886e	rerank	all	ibm-granite/granite-embedding-reranker-english-r2	modernbert	IBM; base_model ibm-granite/granite-embedding-english-r2
+granite-4.0-h-micro-Q4_K_M.gguf	https://huggingface.co/ibm-granite/granite-4.0-h-micro-GGUF/resolve/main/granite-4.0-h-micro-Q4_K_M.gguf	bcc78b9b25450101d1ad90d4b9a264e1bac892f534dfb76066f4eec792fdf023	chat	laptop-light	ibm-granite/granite-4.0-h-micro	granitemoehybrid	IBM; official IBM GGUF
+gpt-oss-20b-MXFP4.gguf	https://huggingface.co/ggml-org/gpt-oss-20b-GGUF/resolve/main/gpt-oss-20b-MXFP4.gguf	27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901	chat	laptop	openai/gpt-oss-20b	gpt_oss	OpenAI; GGUF from ggml-org (llama.cpp maintainers)

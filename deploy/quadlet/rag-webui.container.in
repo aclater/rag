@@ -1,0 +1,37 @@
+[Unit]
+Description=rag Open WebUI (the only published service)
+After=rag-stack.service
+Wants=rag-stack.service
+
+[Container]
+Image=@OPEN_WEBUI_IMAGE@
+Pod=rag.pod
+ContainerName=rag-webui
+Environment=PORT=3000
+# Chat goes to Llama Stack's OpenAI-compatible API inside the pod.
+Environment=OPENAI_API_BASE_URL=http://127.0.0.1:8321/v1
+Environment=OPENAI_API_KEY=unused
+Environment=ENABLE_OLLAMA_API=false
+# Authentication on; no outbound downloads, telemetry or analytics.
+Environment=WEBUI_AUTH=true
+Environment=OFFLINE_MODE=true
+Environment=HF_HUB_OFFLINE=1
+Environment=ANONYMIZED_TELEMETRY=false
+Environment=DO_NOT_TRACK=true
+Environment=SCARF_NO_ANALYTICS=true
+# Open WebUI's own document features use the pod's embedding server.
+Environment=RAG_EMBEDDING_ENGINE=openai
+Environment=RAG_OPENAI_API_BASE_URL=http://127.0.0.1:8081/v1
+Environment=RAG_OPENAI_API_KEY=unused
+Environment=RAG_EMBEDDING_MODEL=@EMBED_MODEL_ID@
+Secret=rag-webui-secret,type=env,target=WEBUI_SECRET_KEY
+Volume=rag-webui-data:/app/backend/data:Z
+DropCapability=all
+NoNewPrivileges=true
+PodmanArgs=--cpus=2 --memory=3g
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

@@ -35,3 +35,6 @@ jobs:
 
       - name: pytest
         run: pytest -q
+
+      - name: shellcheck
+        run: shellcheck deploy/*.sh models/*.sh deploy/db-init/*.sh
