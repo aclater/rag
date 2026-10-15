@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+# Local, never committed: model files, corpora, secrets, private collections
+*.gguf
+*.part
+/data/
+.env
+*.env
+deploy/local/

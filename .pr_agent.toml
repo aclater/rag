@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: Apache-2.0
+# Settings for the AI pull-request reviewer (.github/workflows/pr-agent.yml).
+# The model is set in the workflow's env, so it applies even before this file
+# reaches the default branch.
+
+[ignore]
+glob = ["eval/**/*.yaml", "models/models.tsv"]
+
+[github_action_config]
+# Re-review after each push, not only when the PR opens.
+handle_push_trigger = true
+push_commands = ["/review"]
+
+[pr_reviewer]
+require_tests_review = true
+require_security_review = true
+require_estimate_effort_to_review = false
+extra_instructions = """
+rag is a local, private knowledge base: Llama Stack + RamaLama model servers +
+PostgreSQL/pgvector in one rootless Podman pod, with MCP retrieval tools.
+CLAUDE.md holds the full rules. Review against these first:
+
+- Closed by default: flag anything that publishes a port beyond the chat UI,
+  binds 0.0.0.0 on the host, disables SELinux labelling, adds --privileged,
+  --ipc=host or /dev/kfd, or commits a secret.
+- The repository is public: flag personal details (home network names,
+  hostnames, IP plans, Wi-Fi names, travel plans, private collection contents).
+- Models: flag any model of Chinese origin, including Western models built on
+  Chinese base weights, and any model added without a models.tsv entry
+  (upstream repo, architecture check, sha256).
+- The embedding model is bound to each collection's index: flag code paths
+  that could write vectors from a different model into an existing collection.
+- Untrusted input: documents being ingested may be malformed or hostile; flag
+  unbounded reads, path traversal and parser failures that abort an ingest.
+- Red Hat technologies first (UBI images, Podman, RamaLama, Llama Stack,
+  RHEL-family PostgreSQL, Docling): flag a non-Red Hat replacement that the PR
+  doesn't justify.
+- Docs ship with the change; bug fixes include a regression test.
+
+Don't comment on formatting, import order or annotation style (ruff and mypy
+--strict enforce them).
+"""
+
+[pr_code_suggestions]
+extra_instructions = """
+Follow the same rules as the review. Skip pure style suggestions.
+"""
