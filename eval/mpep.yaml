@@ -1,0 +1,530 @@
+# MPEP golden set. Draft for maintainer review; see README.md.
+# Every expected source below was checked against the live USPTO text on
+# verified_on. Cases with confidence medium/low need a human look.
+collection: mpep
+corpus_version: "Ninth Edition, Revision 01.2024"
+verified_on: 2026-10-15
+source_url: https://www.uspto.gov/web/offices/pac/mpep/
+
+cases:
+  # ── Lookup ────────────────────────────────────────────────────────────
+  - id: mpep-001
+    type: lookup
+    difficulty: easy
+    question: "What rationales for obviousness does the MPEP list from KSR?"
+    expected_answer: >-
+      MPEP 2143 lists the KSR rationales (A)–(G): combining prior art elements
+      by known methods to yield predictable results; simple substitution of one
+      known element for another; use of a known technique to improve similar
+      devices; applying a known technique to a known device ready for
+      improvement; "obvious to try" (choosing from a finite number of
+      identified, predictable solutions); known work in one field prompting
+      variations for use in another; and teaching, suggestion or motivation
+      (TSM) in the prior art.
+    expected_sources: ["2143"]
+    must_mention: ["obvious to try", "predictable"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-002
+    type: lookup
+    difficulty: easy
+    question: "What are the Graham factual inquiries for an obviousness determination?"
+    expected_answer: >-
+      Per MPEP 2141: determine the scope and content of the prior art,
+      ascertain the differences between the claimed invention and the prior
+      art, and resolve the level of ordinary skill in the pertinent art;
+      objective evidence of nonobviousness (secondary considerations) is also
+      considered.
+    expected_sources: ["2141"]
+    must_mention: ["scope and content", "level of ordinary skill"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-003
+    type: lookup
+    difficulty: medium
+    question: "How does Step 2A of the subject matter eligibility analysis work?"
+    expected_answer: >-
+      MPEP 2106: Step 2A is a two-prong inquiry. Prong One asks whether the claim
+      recites a judicial exception (abstract idea, law of nature, natural
+      phenomenon); if so, Prong Two asks whether the claim as a whole integrates
+      the exception into a practical application. If it doesn't, the analysis
+      proceeds to Step 2B (significantly more).
+    expected_sources: ["2106"]
+    must_mention: ["Prong One", "practical application"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-004
+    type: lookup
+    difficulty: easy
+    question: "How do examiners interpret claim language during examination?"
+    expected_answer: >-
+      Claims are given their broadest reasonable interpretation consistent with
+      the specification, as it would be understood by one of ordinary skill in
+      the art (MPEP 2111).
+    expected_sources: ["2111"]
+    must_mention: ["broadest reasonable interpretation"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-005
+    type: lookup
+    difficulty: medium
+    question: "What does the written description requirement require the specification to show?"
+    expected_answer: >-
+      MPEP 2163: the specification must describe the claimed invention in
+      enough detail that one skilled in the art can reasonably conclude the
+      inventor had possession of the claimed invention.
+    expected_sources: ["2163"]
+    must_mention: ["possession"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-006
+    type: lookup
+    difficulty: medium
+    question: "What factors decide whether experimentation needed to practice an invention is undue?"
+    expected_answer: >-
+      The In re Wands factors in MPEP 2164.01(a): breadth of the claims, nature
+      of the invention, state of the prior art, level of ordinary skill, level
+      of predictability in the art, amount of direction provided by the
+      inventor, existence of working examples, and quantity of experimentation
+      needed.
+    expected_sources: ["2164.01(a)"]
+    must_mention: ["Wands", "quantity of experimentation"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-007
+    type: lookup
+    difficulty: medium
+    question: "How does an examiner decide whether claim language is definite?"
+    expected_answer: >-
+      MPEP 2173.02 (35 U.S.C. 112(b)): courts ask whether the claim, read in light
+      of the specification and prosecution history, informs those skilled in the
+      art of its scope with reasonable certainty (Nautilus). The Office doesn't
+      construe claims the way courts do (In re Packard): during examination,
+      under the broadest reasonable interpretation, a claim is indefinite if its
+      language is ambiguous, vague, incoherent, opaque or otherwise unclear.
+    expected_sources: ["2173.02"]
+    must_mention: ["112(b)"]
+    expect_abstain: false
+    notes: "A good answer distinguishes the court standard (Nautilus) from the examination standard (Packard); both verified in 2173 (R-01.2024)."
+    confidence: high
+
+  - id: mpep-008
+    type: lookup
+    difficulty: medium
+    question: "When does a claim limitation invoke 35 U.S.C. 112(f)?"
+    expected_answer: >-
+      MPEP 2181's 3-prong analysis: (A) the limitation uses "means" or "step" or
+      a generic placeholder (nonce term) for performing a function; (B) that
+      term is modified by functional language; and (C) it is not modified by
+      sufficient structure, material or acts for performing the function.
+    expected_sources: ["2181"]
+    must_mention: ["means", "functional language"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-009
+    type: lookup
+    difficulty: easy
+    question: "What is the duty of disclosure in patent prosecution?"
+    expected_answer: >-
+      Under 37 CFR 1.56 (MPEP 2001), each individual associated with filing and
+      prosecuting an application has a duty of candor and good faith, including
+      a duty to disclose all information known to be material to patentability.
+    expected_sources: ["2001"]
+    must_mention: ["candor", "material to patentability"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-010
+    type: lookup
+    difficulty: medium
+    question: "When will an examiner consider an information disclosure statement without any fee or statement?"
+    expected_answer: >-
+      Under 37 CFR 1.97(b) (MPEP 609): if filed within three months of the
+      filing date of a national application, within three months of entry into
+      the national stage, or before the mailing of a first Office action on the
+      merits (or a first action after an RCE), whichever is later.
+    expected_sources: ["609"]
+    must_mention: ["1.97"]
+    expect_abstain: false
+    notes: "The full list of 1.97(b) windows is longer; grade on the three-months-or-before-first-action core."
+    confidence: medium
+
+  - id: mpep-011
+    type: lookup
+    difficulty: easy
+    question: "How long is the term of a utility patent?"
+    expected_answer: >-
+      20 years from the US filing date, or from the earliest non-provisional
+      application whose benefit is claimed, subject to patent term adjustment
+      and extension (35 U.S.C. 154; MPEP 2701).
+    expected_sources: ["2701"]
+    must_mention: ["20 years"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-012
+    type: lookup
+    difficulty: medium
+    question: "Is a claimed range obvious if it overlaps a range in the prior art?"
+    expected_answer: >-
+      MPEP 2144.05: overlapping or encompassing ranges create a prima facie case
+      of obviousness, which the applicant can rebut, e.g. by showing the claimed
+      range is critical (unexpected results) or that the art teaches away.
+    expected_sources: ["2144.05"]
+    must_mention: ["prima facie"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-013
+    type: lookup
+    difficulty: medium
+    question: "Can an online publication count as a printed publication for prior art?"
+    expected_answer: >-
+      Yes. MPEP 2128: electronic publications, including online databases and
+      Internet publications, are printed publications if publicly accessible
+      before the relevant date; the date of public accessibility matters.
+    expected_sources: ["2128"]
+    must_mention: ["publicly accessible"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-014
+    type: lookup
+    difficulty: hard
+    question: "How is obviousness assessed for a design patent claim?"
+    expected_answer: >-
+      MPEP 1504.03: from the viewpoint of a designer of ordinary skill; find a
+      single primary reference with design characteristics basically the same
+      as the claimed design, then ask whether secondary references would have
+      suggested modifying it to produce the claimed overall appearance.
+    expected_sources: ["1504.03"]
+    must_mention: ["primary reference"]
+    expect_abstain: false
+    notes: "Paraphrase of the Rosen/Durling framework as described in 1504.03; verify wording."
+    confidence: medium
+
+  - id: mpep-015
+    type: lookup
+    difficulty: medium
+    question: "Which applications are examined under the AIA first-inventor-to-file rules?"
+    expected_answer: >-
+      MPEP 2159: applications containing, or that ever contained, a claim with
+      an effective filing date on or after March 16, 2013 (or that claim
+      benefit of such an application) are examined under AIA 35 U.S.C. 102 and
+      103.
+    expected_sources: ["2159"]
+    must_mention: ["March 16, 2013"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-016
+    type: lookup
+    difficulty: hard
+    question: "Can I swear behind a reference with a 37 CFR 1.131 declaration in an AIA application?"
+    expected_answer: >-
+      Generally no. MPEP 715: 37 CFR 1.131(a) doesn't apply to applications
+      subject to the AIA first-inventor-to-file provisions unless it's relied on
+      to overcome a rejection under pre-AIA 35 U.S.C. 102(g). For AIA
+      applications, 37 CFR 1.130 declarations (attribution or prior public
+      disclosure) are the counterpart.
+    expected_sources: ["715"]
+    must_mention: ["1.131", "1.130"]
+    expect_abstain: false
+    notes: "Exception wording verified in 715 (R-01.2024)."
+    confidence: high
+
+  - id: mpep-017
+    type: lookup
+    difficulty: medium
+    question: "What kinds of objective evidence can rebut a prima facie case of obviousness?"
+    expected_answer: >-
+      MPEP 716.01(a) and the following sections: secondary considerations such
+      as unexpected results, commercial success, long-felt but unsolved need,
+      failure of others, copying, and skepticism of experts, with a nexus to the
+      claimed invention.
+    expected_sources: ["716.01(a)"]
+    must_mention: ["unexpected results", "commercial success"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-018
+    type: lookup
+    difficulty: medium
+    question: "How should an examiner treat an applicant's rebuttal arguments to an obviousness rejection?"
+    expected_answer: >-
+      MPEP 2145: consider all rebuttal arguments and evidence; attorney argument
+      can't replace evidence where evidence is needed; examples include
+      arguments about teaching away, nonanalogous art, and improper hindsight.
+    expected_sources: ["2145"]
+    expect_abstain: false
+    confidence: medium
+
+  # ── Exact match (identifiers) ─────────────────────────────────────────
+  - id: mpep-019
+    type: exact_match
+    difficulty: easy
+    question: "MPEP 2164.01(a): what is it about?"
+    expected_answer: "The undue experimentation (Wands) factors for enablement."
+    expected_sources: ["2164.01(a)"]
+    must_mention: ["experimentation"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-020
+    type: exact_match
+    difficulty: easy
+    question: "Where does the MPEP cover 37 CFR 1.121?"
+    expected_answer: "MPEP 714, on amendments: 37 CFR 1.121 sets the manner of making amendments."
+    expected_sources: ["714"]
+    must_mention: ["amendment"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-021
+    type: exact_match
+    difficulty: medium
+    question: "What does MPEP 706.07(a) say about making a second action final?"
+    expected_answer: >-
+      A second or subsequent action on the merits can be made final, but not if
+      it includes a new ground of rejection that wasn't necessitated by the
+      applicant's amendment, or a rejection on newly cited art other than art
+      from an information disclosure statement filed during the 37 CFR 1.97(c)
+      period with the fee.
+    expected_sources: ["706.07(a)"]
+    must_mention: ["new ground"]
+    expect_abstain: false
+    confidence: medium
+
+  - id: mpep-022
+    type: exact_match
+    difficulty: medium
+    question: "MPEP 706.07(d): what happens when a final rejection was premature?"
+    expected_answer: "The finality is withdrawn (the examiner withdraws the premature final rejection)."
+    expected_sources: ["706.07(d)"]
+    must_mention: ["premature"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-023
+    type: exact_match
+    difficulty: medium
+    question: "Which MPEP section covers grace period inventor-originated disclosures under AIA 35 U.S.C. 102(b)(1)(A)?"
+    expected_answer: >-
+      MPEP 2153.01 (with 2153.01(a) on inventor-originated disclosures within
+      the grace period): a disclosure made one year or less before the effective
+      filing date by the inventor, a joint inventor, or another who obtained the
+      subject matter from them is excepted as prior art.
+    expected_sources: ["2153.01"]
+    must_mention: ["one year"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-024
+    type: exact_match
+    difficulty: easy
+    question: "Under MPEP 2181, what is prong (B) of the 112(f) analysis?"
+    expected_answer: "The term \"means\" or \"step\" or the generic placeholder is modified by functional language."
+    expected_sources: ["2181"]
+    must_mention: ["functional language"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-025
+    type: exact_match
+    difficulty: medium
+    question: "Can a terminal disclaimer overcome a 35 U.S.C. 101 statutory double patenting rejection?"
+    expected_answer: >-
+      No. MPEP 804: a terminal disclaimer can't obviate statutory (same
+      invention) double patenting; the conflicting claims must be canceled or
+      amended so they're no longer coextensive. Terminal disclaimers address
+      nonstatutory double patenting.
+    expected_sources: ["804"]
+    must_mention: ["cannot"]
+    must_not_mention: ["yes, a terminal disclaimer"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-026
+    type: exact_match
+    difficulty: medium
+    question: "Per MPEP 608.01(n), how must a multiple dependent claim refer to other claims?"
+    expected_answer: "In the alternative only."
+    expected_sources: ["608.01(n)"]
+    must_mention: ["alternative"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-027
+    type: exact_match
+    difficulty: medium
+    question: "What does MPEP 2133 cover?"
+    expected_answer: >-
+      Pre-AIA 35 U.S.C. 102(b): the one-year statutory bar for applications
+      examined under pre-AIA law.
+    expected_sources: ["2133"]
+    must_mention: ["pre-AIA"]
+    expect_abstain: false
+    confidence: high
+
+  # ── Multi-hop ─────────────────────────────────────────────────────────
+  - id: mpep-028
+    type: multi_hop
+    difficulty: hard
+    question: >-
+      The examiner rejected my claims as "obvious to try". What evidence can I
+      put forward to rebut that?
+    expected_answer: >-
+      Combine MPEP 2143 (the obvious-to-try rationale requires a finite number
+      of identified, predictable solutions with a reasonable expectation of
+      success) with 716.01(a) and the following sections (objective evidence
+      such as unexpected results, with a nexus to the claims), typically
+      presented in a 37 CFR 1.132 declaration.
+    expected_sources: ["2143", "716.01(a)"]
+    must_mention: ["unexpected results"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-029
+    type: multi_hop
+    difficulty: hard
+    question: >-
+      My second Office action was made final but contains a new ground of
+      rejection my amendment didn't necessitate. What can I do?
+    expected_answer: >-
+      Under MPEP 706.07(a) the action shouldn't have been made final, since the
+      new ground wasn't necessitated by amendment (or a qualifying IDS). Ask the
+      examiner to withdraw the premature finality, per 706.07(d).
+    expected_sources: ["706.07(a)", "706.07(d)"]
+    must_mention: ["premature"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-030
+    type: multi_hop
+    difficulty: hard
+    question: "How does the broadest reasonable interpretation apply to a means-plus-function limitation?"
+    expected_answer: >-
+      BRI (MPEP 2111) is constrained for 112(f) limitations: per MPEP 2181 (citing
+      In re Donaldson), the BRI of a limitation invoking 112(f) is the structure,
+      material or act described in the specification for performing the entire
+      claimed function, and equivalents.
+    expected_sources: ["2111", "2181"]
+    must_mention: ["Donaldson", "equivalents"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-031
+    type: multi_hop
+    difficulty: hard
+    question: >-
+      My application only claims inventions with an effective filing date in
+      2011. Does the AIA one-year grace period exception apply?
+    expected_answer: >-
+      No. Per MPEP 2159 it's examined under pre-AIA law (no claim on or after
+      March 16, 2013), so the AIA 102(b)(1) exceptions (2153.01) don't apply;
+      pre-AIA 35 U.S.C. 102(b) and its one-year bar (2133) govern instead.
+    expected_sources: ["2159", "2133"]
+    must_mention: ["pre-AIA"]
+    expect_abstain: false
+    confidence: high
+
+  - id: mpep-032
+    type: multi_hop
+    difficulty: medium
+    question: "How do I comply with the duty of disclosure in practice, and when should I file the references?"
+    expected_answer: >-
+      The duty under 37 CFR 1.56 (MPEP 2001) is met by submitting material
+      information in an information disclosure statement under 37 CFR 1.97 and
+      1.98 (MPEP 609), ideally within the 1.97(b) window (e.g. within three
+      months of filing or before the first action on the merits) to avoid fees
+      or statements.
+    expected_sources: ["2001", "609"]
+    must_mention: ["information disclosure statement"]
+    expect_abstain: false
+    confidence: high
+
+  # ── Abstain (not in the corpus) ───────────────────────────────────────
+  - id: mpep-033
+    type: abstain
+    difficulty: medium
+    question: "How does the EPO problem-solution approach to inventive step work?"
+    expected_answer: >-
+      The MPEP doesn't cover European Patent Office practice; the answer should
+      say the corpus doesn't address it rather than answer from general knowledge
+      as if it were the MPEP.
+    expected_sources: []
+    expect_abstain: true
+    confidence: high
+
+  - id: mpep-034
+    type: abstain
+    difficulty: medium
+    question: "How does the China National Intellectual Property Administration examine AI inventions?"
+    expected_answer: "Not covered by the MPEP; the answer should say so and cite nothing."
+    expected_sources: []
+    expect_abstain: true
+    confidence: high
+
+  - id: mpep-035
+    type: abstain
+    difficulty: hard
+    question: "What is the exact current USPTO basic filing fee for a large-entity utility application?"
+    expected_answer: >-
+      The MPEP points to the fee regulations (37 CFR 1.16) and the USPTO fee
+      schedule rather than serving as an authoritative source of current
+      amounts, which change. The answer should not state a dollar figure as the
+      MPEP's position; it may point to the fee schedule.
+    expected_sources: []
+    must_not_mention: ["$"]
+    expect_abstain: true
+    notes: "Borderline: the MPEP mentions fees in places. Decide whether to keep this as abstain or rewrite it as a 'points to 37 CFR 1.16' lookup."
+    confidence: low
+
+  # ── Edition-sensitive ─────────────────────────────────────────────────
+  - id: mpep-036
+    type: edition
+    difficulty: hard
+    question: "What does the MPEP say about inventorship for AI-assisted inventions?"
+    expected_answer: >-
+      In Revision 01.2024, MPEP 2109 addresses inventorship generally (an
+      inventor must contribute to conception) but has no AI-specific guidance;
+      the USPTO's 2024 guidance on AI-assisted inventions was published
+      separately. A correct answer reports what 2109 says and notes the absence,
+      without presenting the separate guidance as MPEP text.
+    expected_sources: ["2109"]
+    must_mention: ["conception"]
+    expect_abstain: false
+    notes: "Designed to change: if a later revision adds AI guidance to 2109, update this case."
+    confidence: medium
+
+  - id: mpep-037
+    type: edition
+    difficulty: hard
+    question: "Does the MPEP's subject matter eligibility guidance include the 2024 update for artificial intelligence inventions?"
+    expected_answer: >-
+      Not in Revision 01.2024: MPEP 2106 contains no AI-specific eligibility
+      examples. The answer should say the indexed MPEP doesn't include it, not
+      summarise the separate USPTO guidance as if it were MPEP text.
+    expected_sources: ["2106"]
+    expect_abstain: false
+    notes: "Verified: no occurrence of 'artificial intelligence' in 2106 (R-01.2024)."
+    confidence: medium
+
+  - id: mpep-038
+    type: edition
+    difficulty: easy
+    question: "Which edition and revision of the MPEP are you answering from?"
+    expected_answer: >-
+      The indexed edition (expected: Ninth Edition, Revision 01.2024). The system
+      should answer from corpus metadata, not guess.
+    expected_sources: []
+    expect_abstain: false
+    notes: "Requires the ingester to record the corpus revision as metadata. The old suite didn't record which revision it ingested."
+    confidence: medium

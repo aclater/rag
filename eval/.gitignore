@@ -1,0 +1,4 @@
+# Private golden sets (personal Drive, git, web and other non-public
+# collections) stay local. See private-templates.md.
+private/
+reports/
