@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from typing import Any
@@ -11,7 +12,11 @@ from rag.config import Settings
 from rag.stack import Reranker, StackClient
 
 DEFAULT_K = 10
-CANDIDATES = 40  # per collection, from Llama Stack's hybrid (keyword + vector, RRF) query
+CANDIDATES = 30  # per collection, from Llama Stack's hybrid (keyword + vector, RRF) query
+RERANK_CHARS = 1500  # the reranker sees each chunk's header and opening text
+PINNED_CHUNKS = 2  # chunks of an explicitly named section placed first
+# Section-like identifiers, e.g. 2143, 2143.01, 2164.01(a), 608.01(n).
+IDENTIFIER = re.compile(r"(?<![\w.])(\d{2,4}(?:\.\d{1,2})?(?:\([a-z0-9]{1,3}\))*)(?![\w(])")
 
 
 @dataclass(frozen=True)
@@ -97,12 +102,54 @@ class Searcher:
                 )
         results = list(pool.values())
         if rerank and results:
-            scores = self.reranker.rerank(query, [r.text for r in results])
+            scores = self.reranker.rerank(query, [r.text[:RERANK_CHARS] for r in results])
             results = [
                 Result(**{**r.as_dict(), "score": s}) for r, s in zip(results, scores, strict=True)
             ]
         results.sort(key=lambda r: r.score, reverse=True)
+        pinned = self._pinned(query, collections, pool)
+        if pinned:
+            ids = {r.id for r in pinned}
+            results = pinned + [r for r in results if r.id not in ids]
         return results[:k]
+
+    def _pinned(
+        self, query: str, collections: Sequence[str] | None, pool: dict[str, Result]
+    ) -> list[Result]:
+        """Chunks of sections the query names explicitly (e.g. "MPEP 2164.01(a)").
+
+        Cross-encoders score bare identifiers poorly, so an exact, existing section
+        id in the query is honoured deterministically: that section's first chunks
+        go first, in the order the ids appear.
+        """
+        ids = list(dict.fromkeys(IDENTIFIER.findall(query)))
+        if not ids:
+            return []
+        out: list[Result] = []
+        conn = db.connect(self.settings.db_dsn)
+        try:
+            for c in self._collections(collections):
+                for sid in db.existing_sections(conn, c.name, ids):
+                    sec = db.get_section(conn, c.name, sid)
+                    if sec is None:
+                        continue
+                    for cid in list(sec.chunk_ids)[:PINNED_CHUNKS]:
+                        known = pool.get(cid)
+                        out.append(
+                            Result(
+                                id=cid,
+                                collection=c.name,
+                                section=sec.section,
+                                title=sec.title,
+                                text=known.text if known else sec.body[:RERANK_CHARS],
+                                score=1000.0,  # above any rerank or fusion score
+                                source_url=sec.source_url,
+                                corpus_version=sec.corpus_version,
+                            )
+                        )
+        finally:
+            conn.close()
+        return out
 
     def fetch(self, chunk_or_section: str, collection: str | None = None) -> dict[str, Any]:
         """Return a whole source section, given a chunk id ("mpep:2143.01#2") or a section id."""

@@ -208,3 +208,18 @@ def get_section(
 def touch_collection(conn: psycopg.Connection[tuple[object, ...]], name: str) -> None:
     with conn.cursor() as cur:
         cur.execute("UPDATE rag_collection SET updated_at = now() WHERE name = %s", (name,))
+
+
+def existing_sections(
+    conn: psycopg.Connection[tuple[object, ...]], collection: str, candidates: Sequence[str]
+) -> list[str]:
+    """Which of the candidate section ids exist in the collection (input order kept)."""
+    if not candidates:
+        return []
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT section FROM rag_section WHERE collection = %s AND section = ANY(%s)",
+            (collection, list(candidates)),
+        )
+        found = {str(r[0]) for r in cur.fetchall()}
+    return [c for c in candidates if c in found]
