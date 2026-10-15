@@ -1,0 +1,25 @@
+[Unit]
+Description=rag MCP retrieval tools (search, fetch, list_collections)
+After=rag-stack.service rag-rerank.service rag-db.service
+Wants=rag-stack.service rag-rerank.service
+
+[Container]
+# Built locally by deploy/install.sh from deploy/images/mcp (UBI 10 base).
+Image=localhost/rag-mcp:@APP_TAG@
+Pod=rag.pod
+ContainerName=rag-mcp
+Environment=RAG_EMBED_MODEL=embed/@EMBED_MODEL_ID@
+Environment=RAG_EMBED_DIM=@EMBED_DIM@
+Environment=RAG_RERANK_MODEL=@RERANK_MODEL_ID@
+Secret=rag-db-password,type=env,target=POSTGRES_PASSWORD
+HealthCmd=python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/health', timeout=3)"
+HealthInterval=30s
+DropCapability=all
+NoNewPrivileges=true
+PodmanArgs=--cpus=1 --memory=512m
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

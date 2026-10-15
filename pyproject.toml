@@ -12,10 +12,21 @@ requires-python = ">=3.12"
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["ruff==0.16.9", "mypy==2.3.1", "pytest==9.1.1"]
+# The MCP server and search (small; runs in the rag-mcp container).
+server = ["mcp==2.2.0", "httpx==0.28.1", "psycopg[binary]==3.3.6", "pyyaml==6.0.3"]
+# Ingestion adds Docling (large; runs in the rag-ingest container).
+ingest = ["rag[server]", "docling==2.131.0"]
+dev = ["rag[server]", "ruff==0.16.9", "mypy==2.3.1", "pytest==9.1.1", "types-PyYAML==6.0.12.20250915"]
+
+[project.scripts]
+rag = "rag.cli:main"
+rag-mcp = "rag.mcp_server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+rag = ["py.typed", "migrations/*.sql"]
 
 [tool.ruff]
 line-length = 100
@@ -29,6 +40,11 @@ ignore = ["S101"]
 python_version = "3.12"
 strict = true
 files = ["src"]
+
+# Docling is installed only in the rag-ingest image, not the dev environment.
+[[tool.mypy.overrides]]
+module = ["docling.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

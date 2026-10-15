@@ -24,6 +24,8 @@ class Settings:
             rerank_url=os.environ.get("RAG_RERANK_URL", "http://127.0.0.1:8082/v1").rstrip("/"),
             embed_model=os.environ.get("RAG_EMBED_MODEL", "embed/granite-embedding-english-r2"),
             embed_dim=int(os.environ.get("RAG_EMBED_DIM", "768")),
-            rerank_model=os.environ.get("RAG_RERANK_MODEL", "granite-embedding-reranker-english-r2"),
+            rerank_model=os.environ.get(
+                "RAG_RERANK_MODEL", "granite-embedding-reranker-english-r2"
+            ),
             db_dsn=os.environ.get("RAG_DB_DSN", default_dsn),
         )

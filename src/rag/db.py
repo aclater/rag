@@ -52,7 +52,8 @@ def migrate(conn: psycopg.Connection[tuple[object, ...]]) -> list[str]:
         cur.execute("SELECT name FROM rag_schema_migration")
         done = {str(row[0]) for row in cur.fetchall()}
         files = sorted(
-            f for f in resources.files("rag.migrations").iterdir() if f.name.endswith(".sql")
+            (f for f in resources.files("rag.migrations").iterdir() if f.name.endswith(".sql")),
+            key=lambda f: f.name,
         )
         for f in files:
             if f.name in done:

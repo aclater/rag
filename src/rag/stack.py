@@ -41,26 +41,11 @@ class StackClient:
     def insert_chunks(self, vector_store_id: str, chunks: list[dict[str, Any]]) -> None:
         self._post("/vector-io/insert", {"vector_store_id": vector_store_id, "chunks": chunks})
 
-    def delete_chunks(self, vector_store_id: str, chunk_ids: Sequence[str]) -> None:
-        if not chunk_ids:
-            return
-        r = self._http.request(
-            "DELETE",
-            f"/vector_stores/{vector_store_id}/chunks",
-            json={"chunks": [{"chunk_id": c, "document_id": c.rsplit("#", 1)[0]} for c in chunk_ids]},
-        )
-        if r.status_code == 404:
-            # Older stacks only support deletion through the native vector-io API.
-            r = self._http.post(
-                "/vector-io/delete",
-                json={
-                    "vector_store_id": vector_store_id,
-                    "chunks": [
-                        {"chunk_id": c, "document_id": c.rsplit("#", 1)[0]} for c in chunk_ids
-                    ],
-                },
-            )
-        r.raise_for_status()
+    def delete_vector_store(self, vector_store_id: str) -> None:
+        """Delete a whole vector store (Llama Stack 0.7.1 has no per-chunk delete route)."""
+        r = self._http.delete(f"/vector_stores/{vector_store_id}")
+        if r.status_code != 404:
+            r.raise_for_status()
 
     def query(
         self, vector_store_id: str, query: str, max_chunks: int, mode: str = "hybrid"
