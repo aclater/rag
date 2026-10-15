@@ -53,13 +53,16 @@ rootless Podman pod; nothing leaves it.
 Requirements: Fedora or RHEL with Podman 5, a Vulkan-capable GPU (AMD
 Radeon 780M/890M or Strix Halo were the development targets), ~25 GB free disk.
 
-The model download (#6), the pod (#5) and ingestion (#9) land in the open
-issues; this section gains the exact commands as each one merges. For now:
-
 ```bash
 git clone https://github.com/aclater/rag && cd rag
-pip install -e '.[dev]' && pytest -q
+models/fetch.sh laptop-light       # download the profile's models, verify sha256
+deploy/install.sh laptop-light     # render quadlets, create secrets, start the pod
 ```
+
+The UI is then on http://127.0.0.1:3000 (first sign-up becomes the admin).
+Profiles, containers, security choices and troubleshooting:
+[docs/deploy.md](docs/deploy.md). Ingestion and the retrieval tools land in
+#9 and #10.
 
 See [docs/architecture.md](docs/architecture.md) for profiles, ports and
 operations.

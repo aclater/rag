@@ -1,0 +1,25 @@
+[Unit]
+Description=rag Llama Stack (Red Hat Open Data Hub build)
+After=rag-db.service rag-chat.service rag-embed.service
+Requires=rag-db.service
+Wants=rag-db.service rag-chat.service rag-embed.service
+
+[Container]
+Image=@LLAMA_STACK_IMAGE@
+Pod=rag.pod
+ContainerName=rag-stack
+Volume=@RUNTIME@/stack/config.yaml:/opt/app-root/rag-config.yaml:ro,Z
+Environment=RUN_CONFIG_PATH=/opt/app-root/rag-config.yaml
+Environment=CHAT_MODEL_ID=@CHAT_MODEL_ID@
+Environment=EMBED_MODEL_ID=@EMBED_MODEL_ID@
+Environment=EMBED_DIM=@EMBED_DIM@
+Secret=rag-db-password,type=env,target=POSTGRES_PASSWORD
+DropCapability=all
+NoNewPrivileges=true
+PodmanArgs=--cpus=2 --memory=4g
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

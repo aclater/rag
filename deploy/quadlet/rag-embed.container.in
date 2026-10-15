@@ -1,0 +1,21 @@
+[Unit]
+Description=rag embedding model (llama.cpp via the RamaLama image)
+
+[Container]
+Image=@RAMALAMA_IMAGE@
+Pod=rag.pod
+ContainerName=rag-embed
+# Vulkan needs only the render node; SELinux labelling stays on.
+AddDevice=/dev/dri
+Volume=@MODELS@:/models:ro,z
+Environment=HOME=/tmp
+Exec=llama-server --host 127.0.0.1 --port 8081 --no-webui -ngl 999 --model /models/@EMBED_MODEL_FILE@ --alias @EMBED_MODEL_ID@ --embedding --ctx-size 8192 --batch-size 8192 --ubatch-size 8192 --threads 4
+DropCapability=all
+NoNewPrivileges=true
+PodmanArgs=--cpus=4 --memory=2g
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

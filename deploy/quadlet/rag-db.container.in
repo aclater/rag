@@ -1,0 +1,28 @@
+[Unit]
+Description=rag PostgreSQL 16 + pgvector
+
+[Container]
+Image=@POSTGRES_IMAGE@
+Pod=rag.pod
+ContainerName=rag-db
+Environment=POSTGRESQL_USER=rag
+Environment=POSTGRESQL_DATABASE=rag
+Secret=rag-db-password,type=env,target=POSTGRESQL_PASSWORD
+Secret=rag-db-admin-password,type=env,target=POSTGRESQL_ADMIN_PASSWORD
+Volume=rag-db-data:/var/lib/pgsql/data:Z
+# Enables pgvector (idempotent; the image runs these scripts after every start).
+Volume=@RUNTIME@/db-init:/opt/app-root/src/postgresql-start:ro,Z
+HealthCmd=pg_isready -h 127.0.0.1 -p 5432 -d rag
+HealthInterval=10s
+HealthStartPeriod=60s
+# The unit becomes active only once the database is healthy.
+Notify=healthy
+DropCapability=all
+NoNewPrivileges=true
+PodmanArgs=--cpus=2 --memory=2g
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

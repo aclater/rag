@@ -1,0 +1,11 @@
+# rag: one pod, shared loopback for the services inside it.
+# Only the chat UI is published, and only on the host's loopback.
+[Unit]
+Description=rag knowledge base pod
+
+[Pod]
+PodName=rag
+PublishPort=127.0.0.1:@UI_PORT@:3000
+
+[Install]
+WantedBy=default.target

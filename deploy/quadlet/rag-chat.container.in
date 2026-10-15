@@ -1,0 +1,21 @@
+[Unit]
+Description=rag chat model (llama.cpp via the RamaLama image)
+
+[Container]
+Image=@RAMALAMA_IMAGE@
+Pod=rag.pod
+ContainerName=rag-chat
+# Vulkan needs only the render node; SELinux labelling stays on.
+AddDevice=/dev/dri
+Volume=@MODELS@:/models:ro,z
+Environment=HOME=/tmp
+Exec=llama-server --host 127.0.0.1 --port 8080 --no-webui -ngl 999 --model /models/@CHAT_MODEL_FILE@ --alias @CHAT_MODEL_ID@ --ctx-size @CHAT_CTX@ --jinja --threads 8
+DropCapability=all
+NoNewPrivileges=true
+PodmanArgs=--cpus=8 --memory=8g
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
