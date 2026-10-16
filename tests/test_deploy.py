@@ -12,7 +12,7 @@ FORBIDDEN = ["SecurityLabelDisable", "/dev/kfd", "--privileged", "--ipc=host", "
 
 def test_quadlets_exist() -> None:
     assert (DEPLOY / "quadlet" / "rag.pod.in").exists()
-    assert len(CONTAINERS) >= 6
+    assert len(CONTAINERS) >= 7
 
 
 def test_no_forbidden_settings() -> None:
@@ -67,6 +67,7 @@ def test_profiles_define_every_placeholder() -> None:
         "OPEN_WEBUI_IMAGE",
         "MODELS",
         "RUNTIME",
+        "APP_TAG",
     }
     for profile in (DEPLOY / "profiles").glob("*.env"):
         keys = set(re.findall(r"^([A-Z_]+)=", profile.read_text(), re.M))

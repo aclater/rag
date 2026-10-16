@@ -24,10 +24,13 @@ Granite rows were measured without the temperature gate; the others with it.
 
 ### Guidance
 
-- **`laptop` profile:** gpt-oss-20b (default, best tool calling) or Gemma 4
-  26B-A4B. Both generate ~28 tok/s. gpt-oss reads prompts faster.
+- **`laptop` profile:** gpt-oss-20b (default, best tool calling and the most
+  precise citations in the answer-level eval). Gemma 4 26B-A4B is the
+  `laptop-gemma` profile: close behind, with better coverage. Both generate
+  ~28 tok/s; gpt-oss reads prompts faster. Answer-level numbers are in
+  [ingest-and-search.md](ingest-and-search.md#answer-level-results-which-chat-model).
 - **`laptop-light` profile:** Granite 4.0-H-Micro, fast and small; fine for
-  pipeline tests and light use.
+  pipeline tests, but it doesn't produce reliable cited answers.
 - **Prefer mixture-of-experts models on iGPUs:** generation is bound by memory
   bandwidth, so the 26B MoE (~4B active) is ~2.5× faster than dense Gemma 12B.
 - **Don't ingest while chatting:** CPU and iGPU share memory bandwidth. Docling

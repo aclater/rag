@@ -14,6 +14,7 @@ Environment=OPENAI_API_KEY=unused
 Environment=ENABLE_OLLAMA_API=false
 # Authentication on; no outbound downloads, telemetry or analytics.
 Environment=WEBUI_AUTH=true
+Environment=CORS_ALLOW_ORIGIN=http://127.0.0.1:@UI_PORT@;http://localhost:@UI_PORT@
 Environment=OFFLINE_MODE=true
 Environment=HF_HUB_OFFLINE=1
 Environment=ANONYMIZED_TELEMETRY=false
@@ -24,6 +25,10 @@ Environment=RAG_EMBEDDING_ENGINE=openai
 Environment=RAG_OPENAI_API_BASE_URL=http://127.0.0.1:8081/v1
 Environment=RAG_OPENAI_API_KEY=unused
 Environment=RAG_EMBEDDING_MODEL=@EMBED_MODEL_ID@
+# The rag retrieval tools, offered to the chat model over MCP (first-boot
+# default; later changes are made in Admin settings > External tools).
+Environment=ENABLE_TOOL_SERVERS=true
+Environment='TOOL_SERVER_CONNECTIONS=[{"type":"mcp","url":"http://127.0.0.1:8090/mcp","path":"","auth_type":"none","key":"","config":{"enable":true},"info":{"id":"rag","name":"rag","description":"Search and fetch from the indexed document collections, with citable ids."}}]'
 Secret=rag-webui-secret,type=env,target=WEBUI_SECRET_KEY
 Volume=rag-webui-data:/app/backend/data:Z
 DropCapability=all

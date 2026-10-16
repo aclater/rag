@@ -24,7 +24,9 @@ grep -v '^#' "$MANIFEST" | while IFS=$'\t' read -r file url sha role profiles _;
         mv "$out.part" "$out"
         echo "ok      $role  $file"
     else
-        echo "checksum mismatch: $file (kept as $out.part for inspection)" >&2
+        # Never resume onto a bad partial: move it aside so the next run starts clean.
+        mv -f "$out.part" "$out.bad"
+        echo "checksum mismatch: $file (moved to $out.bad; rerun to download afresh)" >&2
         exit 1
     fi
 done

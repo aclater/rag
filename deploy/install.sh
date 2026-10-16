@@ -34,10 +34,23 @@ for img in "$RAMALAMA_IMAGE" "$LLAMA_STACK_IMAGE" "$POSTGRES_IMAGE" "$OPEN_WEBUI
     podman image exists "$img" || podman pull -q "$img" >/dev/null
 done
 
+# This project's own MCP image, tagged by source revision.
+APP_TAG=$(git -C "$HERE/.." rev-parse --short HEAD 2>/dev/null || echo dev)
+if [ -n "$(git -C "$HERE/.." status --porcelain 2>/dev/null)" ]; then
+    APP_TAG=dev  # uncommitted changes: always rebuild
+    podman image rm -f localhost/rag-mcp:dev >/dev/null 2>&1 || true
+fi
+if ! podman image exists "localhost/rag-mcp:$APP_TAG"; then
+    podman build -q --build-arg "BASE=$UBI_PYTHON_IMAGE" -f "$HERE/images/mcp/Containerfile" \
+        -t "localhost/rag-mcp:$APP_TAG" "$HERE/.." >/dev/null
+fi
+
 # Secrets: generated once, stored only in podman's secret store.
-for s in rag-db-password rag-db-admin-password rag-webui-secret; do
+for s in rag-db-password rag-db-admin-password; do
     podman secret exists "$s" || head -c 32 /dev/urandom | base64 | tr -d '/+=' | podman secret create "$s" - >/dev/null
 done
+# Open WebUI uses its secret as a Fernet key: URL-safe base64 of 32 bytes.
+podman secret exists rag-webui-secret || head -c 32 /dev/urandom | base64 | tr '+/' '-_' | podman secret create rag-webui-secret - >/dev/null
 
 render() {
     sed -e "s|@RAMALAMA_IMAGE@|$RAMALAMA_IMAGE|g" \
@@ -54,7 +67,8 @@ render() {
         -e "s|@EMBED_MODEL_ID@|$EMBED_MODEL_ID|g" \
         -e "s|@EMBED_DIM@|$EMBED_DIM|g" \
         -e "s|@RERANK_MODEL_FILE@|$RERANK_MODEL_FILE|g" \
-        -e "s|@RERANK_MODEL_ID@|$RERANK_MODEL_ID|g" "$1"
+        -e "s|@RERANK_MODEL_ID@|$RERANK_MODEL_ID|g" \
+        -e "s|@APP_TAG@|$APP_TAG|g" "$1"
 }
 for t in "$HERE"/quadlet/*.in; do
     out="$QUADLETS/$(basename "${t%.in}")"
