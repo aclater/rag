@@ -70,6 +70,9 @@ OpenAI-compatible endpoint.
 | `laptop` | gpt-oss-20b | same | same | 32 GB+ GPU-addressable memory (e.g. Radeon 890M) |
 | `workstation` | gpt-oss-120b | same | same | 96 GB+ unified memory (e.g. Strix Halo) |
 
+Measured speeds for these and other candidate chat models on the `laptop`
+hardware are in [models.md](models.md).
+
 Rules:
 
 - **No Chinese-origin models**, including models built on Chinese base weights.
