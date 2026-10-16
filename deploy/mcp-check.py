@@ -19,7 +19,7 @@ import httpx
 from mcp.client.session import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 
-from rag.answers import CITATION, MAX_ROUNDS, SYSTEM
+from rag.answers import CITATION, FINAL_NUDGE, MAX_ROUNDS, SYSTEM
 
 MCP_URL = os.environ.get("RAG_MCP_URL", "http://127.0.0.1:8090/mcp")
 STACK_URL = os.environ.get("RAG_STACK_URL", "http://127.0.0.1:8321/v1")
@@ -69,6 +69,8 @@ async def ask(session: ClientSession, http: httpx.AsyncClient, model: str, q: st
         body: dict[str, Any] = {"model": model, "messages": messages, "max_tokens": 1500}
         if round_ < MAX_ROUNDS:
             body["tools"] = tools
+        else:
+            body["messages"] = messages + [{"role": "user", "content": FINAL_NUDGE}]
         r = await http.post("/chat/completions", json=body)
         r.raise_for_status()
         msg = r.json()["choices"][0]["message"]

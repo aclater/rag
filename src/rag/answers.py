@@ -24,10 +24,11 @@ import yaml
 from rag.evaluate import matches
 from rag.search import Searcher
 
-MAX_ROUNDS = 4
-CITATION = re.compile(r"\[([a-z0-9_-]+:[0-9A-Za-z.()]+#\d+)\]")
+MAX_ROUNDS = 6
+# Square brackets as instructed; gpt-oss sometimes uses its native 【】 instead.
+CITATION = re.compile(r"[\[【]([a-z0-9_-]+:[0-9A-Za-z.()]+#\d+)[\]】]")
 ABSTAIN = re.compile(
-    r"(does not|doesn't|do not|don't) (cover|address|contain|say|mention)|"
+    r"(does not|doesn't|do not|don't) (cover|address|contain|include|say|mention|have)|"
     r"no (relevant )?(information|guidance|section)|not (covered|addressed) (in|by)|"
     r"(could not|couldn't|cannot|can't) find|outside (the )?(scope|corpus)",
     re.I,
@@ -38,6 +39,10 @@ SYSTEM = (
     "Cite every claim with the result id in square brackets, e.g. [mpep:2143#0], "
     "using only ids returned by the tools. If the collections don't cover the "
     "question, say that the collections don't cover it and cite nothing."
+)
+FINAL_NUDGE = (
+    "Answer now from the tool results above, citing ids in square brackets, or say "
+    "that the collections don't cover the question."
 )
 TOOLS = [
     {
@@ -107,6 +112,9 @@ def chat_turn(
         body: dict[str, Any] = {"model": model, "messages": messages, "max_tokens": 1500}
         if round_ < MAX_ROUNDS:
             body["tools"] = TOOLS
+        else:
+            # Out of tool rounds: without this, some models return an empty message.
+            body["messages"] = messages + [{"role": "user", "content": FINAL_NUDGE}]
         r = http.post("/chat/completions", json=body)
         r.raise_for_status()
         msg = r.json()["choices"][0]["message"]
