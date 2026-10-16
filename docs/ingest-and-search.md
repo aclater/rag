@@ -117,6 +117,32 @@ usable interactively. Hybrid retrieval without rerank is the default until the
 GGUF reranker matches the reference (or a GPU-served reference reranker is
 available); the reranker container stays in the pod for opt-in use.
 
-Retrieval metrics don't depend on the chat model. Answer-level metrics
-(citation accuracy, abstention) need a chat turn per case and are the next
-step; see eval/README.md.
+Retrieval metrics don't depend on the chat model.
+
+### Answer-level results: which chat model
+
+`deploy/eval.sh --answers chat/<model>` runs each case as a real chat turn:
+the model gets the same `search`/`fetch` tools, up to six tool rounds, and
+answers with citations; scoring is defined in [eval/README.md](../eval/README.md).
+MPEP, 38 cases, hybrid retrieval without rerank, one run each on a Radeon 890M
+laptop with nothing else running:
+
+| Chat model (profile) | grounded | citation accuracy | coverage | must-mention | false / missed abstention | s/case |
+|---|---|---|---|---|---|---|
+| **gpt-oss-20b** (`laptop`) | 1.000 | **0.875** | 0.779 | 0.737 | 0.03 / 0.33 | 70 |
+| Gemma 4 26B-A4B (`laptop-gemma`) | 1.000 | 0.747 | **0.794** | **0.868** | 0.03 / **0.00** | 80 |
+| Granite 4.0-H-Micro (`laptop-light`) | 0.938 | 0.125 | 0.029 | 0.658 | 0.20 / 1.00 | 48 |
+
+- **gpt-oss-20b stays the `laptop` default**: the most precise citations, and it
+  searches more (2.5 tool rounds per case against Gemma's 1.05). Gemma 4
+  26B-A4B is a close alternative with better coverage and content recall.
+- **Granite 4.0-H-Micro is not usable for cited answers**: it rarely cites ids,
+  answers abstention questions from its own knowledge, and invents ids. Keep
+  `laptop-light` for pipeline tests.
+- Only three cases test abstention, so one case moves the rate by 0.33; a
+  second gpt-oss run scored 0.00 missed abstention. Treat differences of a few
+  points as noise until the eval set grows.
+
+The models cite in their own styles: gpt-oss sometimes uses its native `【id】`
+brackets, Gemma groups ids (`[id1, id2]`); the scorer accepts both, and every
+citation is checked against the ids the tools actually returned in that turn.

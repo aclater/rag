@@ -42,8 +42,9 @@ rootless Podman pod; nothing leaves it.
   embeddings, reranking and light chat.
 - **Model profiles, not hard-coded models.** Chat and reranker models swap per
   profile; the embedding model is bound to each collection's index.
-- **Hybrid retrieval with citations** that are checked against what was
-  actually retrieved.
+- **Hybrid retrieval (keyword + vector) with citations** that are checked
+  against what was actually retrieved; a cross-encoder reranker is available
+  but off by default, because on the eval it hurt.
 - **Closed by default:** one exposed port, no secrets in the repo.
 - **Measured, not guessed:** an evaluation set (see `eval/`) gates retrieval and
   model changes.
@@ -55,14 +56,18 @@ Radeon 780M/890M or Strix Halo were the development targets), ~25 GB free disk.
 
 ```bash
 git clone https://github.com/aclater/rag && cd rag
-models/fetch.sh laptop-light       # download the profile's models, verify sha256
-deploy/install.sh laptop-light     # build the MCP image, render quadlets, start the pod
+models/fetch.sh laptop             # download the profile's models, verify sha256
+deploy/install.sh laptop           # build the MCP image, render quadlets, start the pod
 deploy/ingest-mpep.sh              # fetch the public USPTO MPEP and index it
 ```
 
 The UI is then on http://127.0.0.1:3000 (the first sign-up becomes the admin),
 with the `rag` tools (search, fetch, list_collections) available to the model.
-Retrieval quality is measured with `deploy/eval.sh` against `eval/mpep.yaml`.
+`laptop` (gpt-oss-20b) needs 32 GB+ of GPU-addressable memory; `laptop-light`
+runs on any recent iGPU but its small chat model doesn't produce reliable cited
+answers. Retrieval and answer quality are measured with `deploy/eval.sh`
+against `eval/mpep.yaml`; current numbers are in
+[docs/ingest-and-search.md](docs/ingest-and-search.md).
 
 Details: [docs/deploy.md](docs/deploy.md) (containers, profiles, security) and
 [docs/ingest-and-search.md](docs/ingest-and-search.md) (connectors, retrieval,
