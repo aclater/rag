@@ -25,8 +25,22 @@ from rag.evaluate import matches
 from rag.search import Searcher
 
 MAX_ROUNDS = 6
-# Square brackets as instructed; gpt-oss sometimes uses its native 【】 instead.
-CITATION = re.compile(r"[\[【]([a-z0-9_-]+:[0-9A-Za-z.()]+#\d+)[\]】]")
+# Square brackets as instructed; gpt-oss sometimes uses its native 【】 instead,
+# and models group several ids in one bracket: [mpep:608.01(n)#0, mpep:608.01(n)#1].
+CITATION_ID = re.compile(r"[a-z0-9_-]+:[0-9A-Za-z.()]+#\d+")
+CITATION_GROUP = re.compile(r"[\[【]([^\]】\n]{1,400})[\]】]")
+
+
+def citations(answer: str) -> list[str]:
+    """Cited ids in order of appearance."""
+    return [
+        cid
+        for group in CITATION_GROUP.findall(answer)
+        for cid in CITATION_ID.findall(group)
+        if re.fullmatch(rf"\s*(?:{CITATION_ID.pattern}[\s,;]*)+", group)
+    ]
+
+
 ABSTAIN = re.compile(
     r"(does not|doesn't|do not|don't) (cover|address|contain|include|say|mention|have)|"
     r"no (relevant )?(information|guidance|section)|not (covered|addressed) (in|by)|"
@@ -141,7 +155,7 @@ def chat_turn(
 
 
 def score_answer(case: dict[str, Any], answer: str, returned: set[str]) -> dict[str, Any]:
-    cited = CITATION.findall(answer)
+    cited = citations(answer)
     cited_sections = [c.split(":", 1)[1].split("#", 1)[0] for c in cited]
     expected = [str(s) for s in case.get("expected_sources") or []]
     grounded = [c for c in cited if c in returned]
@@ -193,6 +207,7 @@ def run_answers(searcher: Searcher, golden: Path, model: str, label: str = "") -
             }
             row |= score_answer(case, answer, returned) | {"tool_rounds": rounds, "error": error}
             row["answer"] = answer[:2000]
+            row["returned"] = sorted(returned)
             rows.append(row)
     finally:
         http.close()

@@ -25,3 +25,10 @@ def test_native_gpt_oss_citation_brackets() -> None:
         case, "In the alternative only【mpep:608.01(n)#0】.", {"mpep:608.01(n)#0"}
     )
     assert scored["citation_coverage"] == 1.0
+
+
+def test_grouped_citations_and_non_citation_brackets() -> None:
+    from rag.answers import citations
+
+    text = "Rules [mpep:608.01(n)#0, mpep:608.01(n)#1]; see [1] and [mpep:2143#1]."
+    assert citations(text) == ["mpep:608.01(n)#0", "mpep:608.01(n)#1", "mpep:2143#1"]

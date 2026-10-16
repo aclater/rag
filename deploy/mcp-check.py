@@ -19,7 +19,7 @@ import httpx
 from mcp.client.session import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 
-from rag.answers import CITATION, FINAL_NUDGE, MAX_ROUNDS, SYSTEM
+from rag.answers import FINAL_NUDGE, MAX_ROUNDS, SYSTEM, citations
 
 MCP_URL = os.environ.get("RAG_MCP_URL", "http://127.0.0.1:8090/mcp")
 STACK_URL = os.environ.get("RAG_STACK_URL", "http://127.0.0.1:8321/v1")
@@ -101,7 +101,7 @@ async def ask(session: ClientSession, http: httpx.AsyncClient, model: str, q: st
             calls_log.append(f"{fn['name']}({json.dumps(args)})")
             messages.append({"role": "tool", "tool_call_id": c["id"], "content": text[:8000]})
     total = time.monotonic() - t0
-    cited = CITATION.findall(answer)
+    cited = citations(answer)
     print(f"\n## {q}\n")
     print(f"tool calls: {'; '.join(calls_log) or 'none'}")
     print(f"cited: {', '.join(f'{c}{"" if c in returned else " (NOT RETURNED)"}' for c in cited)}")
