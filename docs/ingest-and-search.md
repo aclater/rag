@@ -135,6 +135,18 @@ laptop with nothing else running:
 | Gemma 4 26B-A4B (`laptop-gemma`) | 1.000 | 0.747 | **0.794** | **0.868** | 0.03 / **0.00** | 80 |
 | Granite 4.0-H-Micro (`laptop-light`) | 0.938 | 0.125 | 0.029 | 0.658 | 0.20 / 1.00 | 48 |
 
+The same eval on a Strix Halo machine (128 GB), retrieval scores identical
+(recall@5 0.912, MRR 0.793):
+
+| Chat model (profile) | grounded | citation accuracy | coverage | must-mention | false / missed abstention | s/case |
+|---|---|---|---|---|---|---|
+| gpt-oss-20b (`laptop`) | 1.000 | 0.793 | 0.500 | 0.684 | 0.03 / 0.33 | **21** |
+
+Same model and index, so the gaps to the laptop row (citation accuracy, and
+coverage in particular) are run-to-run variation in the model's answers; a
+`workstation` (gpt-oss-120b) run is pending a raised GTT limit
+([models.md](models.md#gpu-memory-on-amd-apus-raise-the-gtt-limit-before-workstation)).
+
 - **gpt-oss-20b stays the `laptop` default**: the most precise citations, and it
   searches more (2.5 tool rounds per case against Gemma's 1.05). Gemma 4
   26B-A4B is a close alternative with better coverage and content recall.

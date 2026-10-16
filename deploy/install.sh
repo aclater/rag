@@ -24,6 +24,28 @@ for f in "$CHAT_MODEL_FILE" "$EMBED_MODEL_FILE" "$RERANK_MODEL_FILE"; do
     [ -f "$MODELS/$f" ] || { echo "missing model $MODELS/$f; run models/fetch.sh $PROFILE" >&2; exit 1; }
 done
 
+# AMD GPUs: refuse a profile whose models leave too little GPU-mappable memory.
+# Filling the GTT completely doesn't fail cleanly: the amdgpu/TTM memory manager
+# soft-locks every GPU client, the desktop included, until the machine is reset.
+# Headroom covers the KV cache, compute buffers and the desktop's own GPU use.
+HEADROOM_GIB=${RAG_GPU_HEADROOM_GIB:-16}
+if [ "${RAG_SKIP_GPU_CHECK:-0}" != 1 ]; then
+    for dev in /sys/class/drm/card*/device; do
+        [ -r "$dev/mem_info_gtt_total" ] || continue
+        gpu_mib=$(( ($(cat "$dev/mem_info_vram_total") + $(cat "$dev/mem_info_gtt_total")) / 1048576 ))
+        model_mib=$(stat -c %s "$MODELS/$CHAT_MODEL_FILE" "$MODELS/$EMBED_MODEL_FILE" "$MODELS/$RERANK_MODEL_FILE" |
+            awk '{s += $1} END {print int(s / 1048576)}')
+        need_mib=$(( model_mib + HEADROOM_GIB * 1024 ))
+        if [ "$need_mib" -gt "$gpu_mib" ]; then
+            echo "profile $PROFILE needs ~$need_mib MiB of GPU-mappable memory (models + ${HEADROOM_GIB} GiB headroom);" >&2
+            echo "this GPU has $gpu_mib MiB (VRAM + GTT). Raise the GTT limit (docs/models.md) or pick a smaller profile." >&2
+            echo "RAG_SKIP_GPU_CHECK=1 overrides this at your own risk." >&2
+            exit 1
+        fi
+        break
+    done
+fi
+
 mkdir -p "$RUNTIME/stack" "$RUNTIME/db-init" "$QUADLETS"
 install -m 0644 "$HERE/stack/config.yaml" "$RUNTIME/stack/config.yaml"
 install -m 0644 "$HERE/db-init/10-pgvector.sh" "$RUNTIME/db-init/10-pgvector.sh"

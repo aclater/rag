@@ -65,7 +65,9 @@ The UI is then on http://127.0.0.1:3000 (the first sign-up becomes the admin),
 with the `rag` tools (search, fetch, list_collections) available to the model.
 `laptop` (gpt-oss-20b) needs 32 GB+ of GPU-addressable memory; `laptop-light`
 runs on any recent iGPU but its small chat model doesn't produce reliable cited
-answers. Retrieval and answer quality are measured with `deploy/eval.sh`
+answers. `workstation` (gpt-oss-120b) is for 96 GB+ machines such as
+Strix Halo, after raising the GPU's GTT limit
+([docs/models.md](docs/models.md#gpu-memory-on-amd-apus-raise-the-gtt-limit-before-workstation)). Retrieval and answer quality are measured with `deploy/eval.sh`
 against `eval/mpep.yaml`; current numbers are in
 [docs/ingest-and-search.md](docs/ingest-and-search.md).
 

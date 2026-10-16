@@ -23,7 +23,7 @@ items carried over.
 - **No Chinese-origin models**, including Western-branded models built on
   Chinese base weights. Before adding any model, check its Hugging Face card
   (`base_model`) **and** its `config.json` architecture, and record the result in
-  `models/models.tsv`. Current picks: gpt-oss-20b (laptop), gpt-oss-120b (home),
+  `models/models.tsv`. Current picks: gpt-oss-20b (laptop), gpt-oss-120b (workstation),
   IBM Granite 4 (light chat), IBM granite-embedding-english-r2 and
   granite-embedding-reranker-english-r2.
 - **The embedding model is bound to the index.** A collection records its
