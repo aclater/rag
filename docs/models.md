@@ -43,8 +43,8 @@ On an APU the GPU maps system memory through the GTT, which the kernel caps at
 half of RAM by default (62.5 GiB on a 128 GB machine). gpt-oss-120b alone is
 59 GiB. With the default cap the `workstation` profile *does* load, but leaves
 the GTT completely full; in testing, a few minutes of chat later the amdgpu/TTM
-memory manager soft-locked every GPU client (the desktop included) and the
-machine had to be reset. Small-context benchmarks run fine and hide this.
+memory manager soft-locked every GPU client (the desktop included) for
+minutes at a time. Small-context benchmarks run fine and hide this.
 
 `deploy/install.sh` therefore refuses a profile when VRAM + GTT is smaller than
 the profile's models plus 16 GiB headroom (`RAG_GPU_HEADROOM_GIB`;
