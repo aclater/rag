@@ -26,7 +26,7 @@ done
 
 # AMD GPUs: refuse a profile whose models leave too little GPU-mappable memory.
 # Filling the GTT completely doesn't fail cleanly: the amdgpu/TTM memory manager
-# soft-locks every GPU client, the desktop included, until the machine is reset.
+# soft-locks every GPU client, the desktop included, for minutes at a time.
 # Headroom covers the KV cache, compute buffers and the desktop's own GPU use.
 HEADROOM_GIB=${RAG_GPU_HEADROOM_GIB:-16}
 if [ "${RAG_SKIP_GPU_CHECK:-0}" != 1 ]; then
