@@ -70,7 +70,7 @@ OpenAI-compatible endpoint.
 | `laptop-light` | IBM Granite 4.0-H-Micro | granite-embedding-english-r2 | granite-embedding-reranker-english-r2 | Any recent iGPU |
 | `laptop` | gpt-oss-20b | same | same | 32 GB+ GPU-addressable memory (e.g. Radeon 890M) |
 | `laptop-gemma` | Gemma 4 26B-A4B (Google QAT q4_0) | same | same | same as `laptop` |
-| `workstation` | gpt-oss-120b | same | same | 96 GB+ unified memory (e.g. Strix Halo) |
+| `workstation` | gpt-oss-120b | same | same | 96 GB+ unified memory (e.g. Strix Halo), GTT limit raised |
 
 Measured speeds for these and other candidate chat models on the `laptop`
 hardware are in [models.md](models.md).

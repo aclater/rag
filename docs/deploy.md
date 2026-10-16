@@ -14,7 +14,11 @@ deploy/uninstall.sh --purge       # also remove volumes and secrets
 
 Requirements: Fedora or RHEL with Podman 5 and systemd user services, a
 Vulkan-capable GPU, ~25 GB free disk for the `laptop` profile (less for
-`laptop-light`).
+`laptop-light`, ~90 GB for `workstation`). `workstation` needs 96 GB+ of
+unified memory **and** a raised GTT limit on AMD APUs; `install.sh` refuses a
+profile that would leave less than 16 GiB of GPU-mappable memory free, because
+a full GTT locks up the whole machine (see
+[models.md](models.md#gpu-memory-on-amd-apus-raise-the-gtt-limit-before-workstation)).
 
 Profiles: `laptop-light` (Granite 4.0-H-Micro chat), `laptop` (gpt-oss-20b,
 recommended), `laptop-gemma` (Gemma 4 26B-A4B) and `workstation`
