@@ -36,7 +36,9 @@ also never leaves a half-updated index.)
   matter and appendices (statutes, rules, index) aren't yet.
 - **Parsing:** Docling (layout model on CPU, no OCR: the PDFs have a text
   layer), chapters in parallel worker processes; parsed chapters are cached by
-  file hash so re-runs skip parsing.
+  file hash so re-runs skip parsing. A chapter that fails to parse doesn't stop
+  the others, but the run then fails without indexing anything, so a collection
+  is never published with chapters missing; a rerun retries only the failures.
 - **Sections:** every MPEP section heading ends with a revision tag, e.g.
   `2143.01 Suggestion or Motivation To Modify the References [R-01.2024]`; those
   headings are the section boundaries. Statute and rule headers (35 U.S.C.,

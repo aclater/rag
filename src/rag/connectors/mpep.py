@@ -132,15 +132,28 @@ def load(
         with ProcessPoolExecutor(max_workers=n) as pool:
             futures = {pool.submit(_parse_chapter, str(p)): p for p in todo}
             # Cache each chapter as soon as it's parsed, so an interrupted run
-            # (e.g. a worker killed for memory) loses nothing already done.
+            # (e.g. a worker killed for memory) loses nothing already done. A
+            # failed chapter doesn't stop the others; the run fails at the end
+            # rather than index a collection with chapters missing.
+            failed: list[str] = []
             for fut in as_completed(futures):
                 p = futures[fut]
-                secs = fut.result()
+                try:
+                    secs = fut.result()
+                except Exception:
+                    log.exception("%s: parse failed", p.name)
+                    failed.append(p.name)
+                    continue
                 parsed[p.name] = secs
                 log.info("%s: %d sections", p.name, len(secs))
                 if parse_cache:
                     out = parse_cache / f"{p.stem}-{_sha256(p)[:16]}.json"
                     out.write_text(json.dumps(secs))
+        if failed:
+            raise RuntimeError(
+                f"could not parse {', '.join(sorted(failed))}; the other chapters are "
+                "cached, so a rerun only retries these"
+            )
     sections: list[SourceSection] = []
     seen: set[str] = set()
     for p in chapters:
