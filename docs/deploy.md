@@ -16,6 +16,30 @@ Requirements: Fedora or RHEL with Podman 5 and systemd user services, a
 Vulkan-capable GPU, ~25 GB free disk for the `laptop` profile (less for
 `laptop-light`).
 
+Profiles: `laptop-light` (Granite 4.0-H-Micro chat), `laptop` (gpt-oss-20b,
+recommended), `laptop-gemma` (Gemma 4 26B-A4B) and `workstation`
+(gpt-oss-120b). Switching profile is `deploy/install.sh <profile>`; the index
+is unaffected because every profile uses the same embedding model.
+
+## Using it
+
+Open `http://127.0.0.1:3000`; the first account created becomes the admin. The
+rag tools arrive as the `rag` MCP tool server (Admin settings > External tools)
+and are offered to the model when you enable **rag** in the chat's tools menu
+(or as a default tool on the model in Admin settings > Models). Open WebUI
+injects the server's instructions (search, then cite ids like
+`[mpep:2143#1]`), and its default native function calling runs the tool loop.
+
+To check the chat path without the browser:
+
+```bash
+deploy/mcp-check.sh "What rationales for obviousness does the MPEP list from KSR?"
+```
+
+It acts as an MCP client against `rag-mcp`, lets the profile's chat model call
+the tools, and prints the tool calls, the cited ids (flagging any the tools
+never returned) and timings.
+
 ## What runs
 
 | Container | Image (pinned in `deploy/images.env`) | Listens (pod loopback) | Limits |
