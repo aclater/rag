@@ -1,7 +1,7 @@
 """MCP server exposing rag's retrieval tools over streamable HTTP.
 
 Tools:
-  search(query, collections, k)   hybrid retrieval + rerank; returns citable chunk ids
+  search(query, collections, k)   hybrid retrieval (optional rerank); returns citable chunk ids
   fetch(id)                       the whole source section for a chunk or section id
   list_collections()              what's indexed, which corpus version, how many sections
 

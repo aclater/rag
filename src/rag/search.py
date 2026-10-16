@@ -1,7 +1,8 @@
-"""Hybrid retrieval with cross-encoder reranking, plus section fetch."""
+"""Hybrid retrieval with optional cross-encoder reranking, plus section fetch."""
 
 from __future__ import annotations
 
+import os
 import re
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
@@ -13,7 +14,7 @@ from rag.stack import Reranker, StackClient
 
 DEFAULT_K = 10
 CANDIDATES = 30  # per collection, from Llama Stack's hybrid (keyword + vector, RRF) query
-RERANK_CHARS = 1500  # the reranker sees each chunk's header and opening text
+RERANK_CHARS = 4000  # whole chunk: header plus up to chunking.MAX_CHARS of body
 PINNED_CHUNKS = 2  # chunks of an explicitly named section placed first
 # Section-like identifiers, e.g. 2143, 2143.01, 2164.01(a), 608.01(n).
 IDENTIFIER = re.compile(r"(?<![\w.])(\d{2,4}(?:\.\d{1,2})?(?:\([a-z0-9]{1,3}\))*)(?![\w(])")
@@ -51,6 +52,15 @@ class Searcher:
         self.settings = settings
         self.stack = StackClient(settings.stack_url)
         self.reranker = Reranker(settings.rerank_url, settings.rerank_model)
+        # Tunables, overridable for evaluation runs.
+        self.candidates = int(os.environ.get("RAG_CANDIDATES", CANDIDATES))
+        self.rerank_chars = int(os.environ.get("RAG_RERANK_CHARS", RERANK_CHARS))
+        # "replace": order by the reranker's score; "rrf": fuse the hybrid rank
+        # and the rerank rank with reciprocal rank fusion.
+        self.rerank_fusion = os.environ.get("RAG_RERANK_FUSION", "replace")
+        # Off by default: on the MPEP eval the llama.cpp port of the Granite
+        # reranker lowers recall@5 and MRR (docs/ingest-and-search.md).
+        self.rerank_default = os.environ.get("RAG_RERANK", "0") == "1"
 
     def close(self) -> None:
         self.stack.close()
@@ -75,13 +85,16 @@ class Searcher:
         k: int = DEFAULT_K,
         *,
         mode: str = "hybrid",
-        rerank: bool = True,
-        candidates: int = CANDIDATES,
+        rerank: bool | None = None,
+        candidates: int | None = None,
     ) -> list[Result]:
         query = query.strip()
         if not query:
             return []
         k = max(1, min(k, 50))
+        candidates = candidates or self.candidates
+        if rerank is None:
+            rerank = self.rerank_default
         pool: dict[str, Result] = {}
         for c in self._collections(collections):
             db.check_binding(c, self.settings.embed_model, self.settings.embed_dim)
@@ -100,13 +113,26 @@ class Searcher:
                     source_url=str(meta.get("source_url", "")),
                     corpus_version=str(meta.get("corpus_version", c.corpus_version)),
                 )
-        results = list(pool.values())
+        results = sorted(pool.values(), key=lambda r: r.score, reverse=True)
         if rerank and results:
-            scores = self.reranker.rerank(query, [r.text[:RERANK_CHARS] for r in results])
-            results = [
-                Result(**{**r.as_dict(), "score": s}) for r, s in zip(results, scores, strict=True)
-            ]
-        results.sort(key=lambda r: r.score, reverse=True)
+            scores = self.reranker.rerank(query, [r.text[: self.rerank_chars] for r in results])
+            if self.rerank_fusion == "rrf":
+                by_rerank = sorted(range(len(results)), key=lambda i: scores[i], reverse=True)
+                rerank_rank = {i: pos for pos, i in enumerate(by_rerank)}
+                fused = [
+                    1.0 / (60 + i + 1) + 1.0 / (60 + rerank_rank[i] + 1)
+                    for i in range(len(results))
+                ]
+                results = [
+                    Result(**{**r.as_dict(), "score": f})
+                    for r, f in zip(results, fused, strict=True)
+                ]
+            else:
+                results = [
+                    Result(**{**r.as_dict(), "score": s})
+                    for r, s in zip(results, scores, strict=True)
+                ]
+            results.sort(key=lambda r: r.score, reverse=True)
         pinned = self._pinned(query, collections, pool)
         if pinned:
             ids = {r.id for r in pinned}
@@ -141,7 +167,7 @@ class Searcher:
                                 collection=c.name,
                                 section=sec.section,
                                 title=sec.title,
-                                text=known.text if known else sec.body[:RERANK_CHARS],
+                                text=known.text if known else sec.body[: self.rerank_chars],
                                 score=1000.0,  # above any rerank or fusion score
                                 source_url=sec.source_url,
                                 corpus_version=sec.corpus_version,

@@ -104,9 +104,11 @@ def run(
     golden: Path,
     *,
     mode: str = "hybrid",
-    rerank: bool = True,
+    rerank: bool | None = None,
     label: str = "",
 ) -> dict[str, Any]:
+    if rerank is None:
+        rerank = searcher.rerank_default
     spec = yaml.safe_load(golden.read_text())
     collection = spec["collection"]
     results: list[CaseResult] = []
@@ -131,6 +133,11 @@ def run(
         "rerank": rerank,
         "embedding_model": searcher.settings.embed_model,
         "rerank_model": searcher.settings.rerank_model if rerank else None,
+        "search": {
+            "candidates": searcher.candidates,
+            "rerank_chars": searcher.rerank_chars if rerank else None,
+            "rerank_fusion": searcher.rerank_fusion if rerank else None,
+        },
         "git_revision": _git_revision(),
         "profile": os.environ.get("RAG_PROFILE", ""),
         "summary": aggregate(results),

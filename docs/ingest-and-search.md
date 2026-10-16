@@ -51,10 +51,16 @@ also never leaves a half-updated index.)
 
 1. **Hybrid candidates** from Llama Stack's pgvector store: keyword
    (PostgreSQL full-text search) and vector similarity, fused with reciprocal
-   rank fusion. 40 candidates per collection.
-2. **Rerank** the candidates with the Granite cross-encoder (llama.cpp
-   `/v1/rerank`).
-3. Return the top `k` with citable ids (`mpep:2143.01#0`), section, title,
+   rank fusion. 30 candidates per collection (`RAG_CANDIDATES`).
+2. **Pinning.** Section ids written in the query (`§ 2143.01`, `2106`) pin
+   that section's first chunks to the top, so exact-reference questions never
+   depend on ranking.
+3. **Optional rerank** with the Granite cross-encoder (llama.cpp
+   `/v1/rerank`). Off by default; see the numbers below. Turn it on with
+   `RAG_RERANK=1` (or `--rerank` on the CLI). `RAG_RERANK_CHARS` (default
+   4000, the whole chunk) and `RAG_RERANK_FUSION` (`replace` orders by the
+   reranker's score; `rrf` fuses hybrid and rerank ranks) tune it.
+4. Return the top `k` with citable ids (`mpep:2143.01#0`), section, title,
    text, score, source URL and corpus version.
 
 `fetch(id)` returns the whole section for a chunk id or section id, from rag's
@@ -78,10 +84,38 @@ mode and git revision. Metrics are defined in [eval/README.md](../eval/README.md
 recall@5/10/20, MRR and exact-match recall@5, per case type.
 
 ```bash
-deploy/eval.sh                          # hybrid + rerank (the default path)
-deploy/eval.sh --no-rerank --label norerank
+deploy/eval.sh                          # the default path: hybrid, no rerank
+deploy/eval.sh --rerank --label rerank
 deploy/eval.sh --mode vector --label vector-only
+RAG_EVAL_DEV=1 RAG_RERANK_FUSION=rrf deploy/eval.sh --rerank --label rrf
 ```
+
+`RAG_EVAL_DEV=1` runs the working tree's `src/rag` instead of the image's, for
+trying search changes without a rebuild. The search tunables above pass through
+from the environment and are recorded in the report.
+
+### Results: MPEP, laptop-light, 34 scored cases
+
+| Setup | recall@5 | recall@10 | recall@20 | MRR | exact@5 | s/query |
+|---|---|---|---|---|---|---|
+| **hybrid, no rerank (default)** | **0.912** | 0.912 | 0.971 | **0.790** | 1.000 | 0.08 |
+| hybrid, 60 candidates, no rerank | 0.912 | 0.912 | 0.971 | 0.790 | 1.000 | 0.08 |
+| hybrid + llama.cpp rerank, 1500 chars | 0.750 | 0.882 | 0.941 | 0.565 | 0.889 | 2.5 |
+| hybrid + llama.cpp rerank, whole chunk | 0.750 | 0.853 | 0.941 | 0.547 | 0.889 | 2.5 |
+| hybrid + llama.cpp rerank, whole chunk, RRF | 0.853 | 0.926 | 0.985 | 0.752 | 1.000 | 2.5 |
+| hybrid + reference reranker (transformers, CPU) | 0.809 | 0.926 | 1.000 | 0.823 | 1.000 | 20.9 |
+| vector + llama.cpp rerank | 0.721 | 0.882 | 0.941 | 0.573 | 0.889 | 2.5 |
+
+Truncation wasn't the problem: giving the reranker the whole chunk changed
+nothing. The **llama.cpp port of granite-embedding-reranker-english-r2 scores
+differently from the reference model**: on a four-document probe the reference
+`ModernBertForSequenceClassification` gives logits 3.04 / 2.12 / 0.88 / 0.45
+where llama-server gives 1.10 / 1.08 / 0.66 / 0.43, so relevant and irrelevant
+passages barely separate. The reference model does improve MRR (0.823) and
+recall@20 (1.000) but costs recall@5 and runs at 21 s/query on CPU, which is not
+usable interactively. Hybrid retrieval without rerank is the default until the
+GGUF reranker matches the reference (or a GPU-served reference reranker is
+available); the reranker container stays in the pod for opt-in use.
 
 Retrieval metrics don't depend on the chat model. Answer-level metrics
 (citation accuracy, abstention) need a chat turn per case and are the next

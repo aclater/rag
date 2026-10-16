@@ -28,7 +28,8 @@
 2. The chat model decides to call `search(query, collections, filters)`, as many
    times as it needs (multi-hop questions become several calls).
 3. `search` runs **hybrid retrieval** (keyword + vector, fused with reciprocal
-   rank fusion), reranks the top candidates with the reranker, and returns chunk
+   rank fusion), optionally reranks the candidates with the reranker (off by
+   default; see [ingest-and-search.md](ingest-and-search.md)), and returns chunk
    ids, text, source and section metadata.
 4. `fetch(id)` returns surrounding context or a whole section when a snippet
    isn't enough.

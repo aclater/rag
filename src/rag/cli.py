@@ -43,7 +43,7 @@ def _cmd_search(settings: Settings, args: argparse.Namespace) -> int:
     s = Searcher(settings)
     try:
         for r in s.search(
-            args.query, args.collection or None, args.k, mode=args.mode, rerank=not args.no_rerank
+            args.query, args.collection or None, args.k, mode=args.mode, rerank=args.rerank
         ):
             print(f"{r.score:8.3f}  {r.id:28}  {r.title[:70]}")
     finally:
@@ -84,14 +84,12 @@ def _cmd_eval(settings: Settings, args: argparse.Namespace) -> int:
 
             for golden in args.golden:
                 report = run_answers(s, Path(golden), args.answers, label=args.label)
-                report["mode"], report["rerank"] = "answers", True
+                report["mode"], report["rerank"] = "answers", s.rerank_default
                 path = write_report(report, Path(args.out))
                 print(json.dumps({"report": str(path), **report["summary"]}, indent=2))
             return 0
         for golden in args.golden:
-            report = run(
-                s, Path(golden), mode=args.mode, rerank=not args.no_rerank, label=args.label
-            )
+            report = run(s, Path(golden), mode=args.mode, rerank=args.rerank, label=args.label)
             path = write_report(report, Path(args.out))
             print(json.dumps({"report": str(path), **report["summary"]}, indent=2))
     finally:
@@ -114,7 +112,12 @@ def main(argv: list[str] | None = None) -> int:
     ps.add_argument("-c", "--collection", action="append")
     ps.add_argument("-k", type=int, default=10)
     ps.add_argument("--mode", choices=["hybrid", "vector", "keyword"], default="hybrid")
-    ps.add_argument("--no-rerank", action="store_true")
+    ps.add_argument(
+        "--rerank",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="cross-encoder rerank (default: RAG_RERANK, off)",
+    )
     pf = sub.add_parser("fetch", help="fetch a whole section by chunk or section id")
     pf.add_argument("id")
     pf.add_argument("-c", "--collection")
@@ -122,7 +125,12 @@ def main(argv: list[str] | None = None) -> int:
     pe = sub.add_parser("eval", help="run retrieval metrics over golden sets")
     pe.add_argument("golden", nargs="+", help="eval/*.yaml files")
     pe.add_argument("--mode", choices=["hybrid", "vector", "keyword"], default="hybrid")
-    pe.add_argument("--no-rerank", action="store_true")
+    pe.add_argument(
+        "--rerank",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="cross-encoder rerank (default: RAG_RERANK, off)",
+    )
     pe.add_argument("--label", default="")
     pe.add_argument(
         "--answers",
