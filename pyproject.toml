@@ -13,10 +13,10 @@ dependencies = []
 
 [project.optional-dependencies]
 # The MCP server and search (small; runs in the rag-mcp container).
-server = ["mcp==2.2.0", "httpx==0.28.1", "psycopg[binary]==3.3.6", "pyyaml==6.0.3"]
+server = ["mcp==2.3.0", "httpx==0.28.1", "psycopg[binary]==3.3.6", "pyyaml==6.0.3"]
 # Ingestion adds Docling (large; runs in the rag-ingest container).
-ingest = ["rag[server]", "docling==2.131.0"]
-dev = ["rag[server]", "ruff==0.16.9", "mypy==2.3.1", "pytest==9.1.1", "types-PyYAML==6.0.12.20250915"]
+ingest = ["rag[server]", "docling==2.135.0"]
+dev = ["rag[server]", "ruff==0.16.10", "mypy==2.4.0", "pytest==9.1.1", "types-PyYAML==6.0.12.20260906"]
 
 [project.scripts]
 rag = "rag.cli:main"
